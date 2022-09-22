@@ -43,4 +43,44 @@ var record = req.body.record;
     } 
 });
 
+// SELECT OR SEARCH
+// @routes GET patient/view
+// @desc View Data from the Database
+// @accessible to All Roles
+
+
+router.get('/view/:patientId', (req, res) => {
+const token = req.headers.authorization.split(' ')[1];   
+if (!token){
+    res.status(200).json({success:false,msg:'Error: Token was not found'});
+}      
+const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
+        
+
+var patientId = req.params.patientId;
+    
+console.log(req.params.id);
+    
+    sqlQuery = `SELECT * FROM medRecord_tb WHERE id=${patientId}`;
+    dbConn.query(sqlQuery, function (error, results, fields) {
+        if (error) throw error;
+        res.status(200).json({
+        msg: 'Data Successfully Fetched',
+        results: results,
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = router;
