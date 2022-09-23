@@ -17,8 +17,6 @@ if (!token){
     
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
     
-console.log(decodedToken.data['email']);
-
 var fullName = req.body.fullName;
 var gender = req.body.gender;
 var dateOfBirth = req.body.dateOfBirth;
@@ -27,6 +25,7 @@ var accountId = decodedToken.data['accountId'];
 var address = req.body.address;
 var qualificationDesc = req.body.qualificationDesc;
 var cellphoneNumber = req.body.cellphoneNumber;
+var role = decodedToken.data['role'];
     
 // connect to mysql database and perform INSERT Query
     if(role === "admin"){
@@ -50,37 +49,23 @@ var cellphoneNumber = req.body.cellphoneNumber;
 // SELECT OR VIEW
 // @routes GET doctors/view
 // @desc View Data from the Database
-// @accessible only to Admin and Doctors
+// @accessible to All Roles
 
 router.get('/view', (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
+const token = req.headers.authorization.split(' ')[1];
     
-    if (!token){
-        res.status(200).json({success:false,msg:'Error: Token was not found'});
-    };
+if (!token){
+    res.status(200).json({success:false,msg:'Error: Token was not found'});
+};
            
-    const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-    console.log(decodedToken.data);
+const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
     
-    var role = decodedToken.data['role'];
-    
-        if(role === "admin"){
-            sqlQuery = 'SELECT * FROM doctor_tb';
-            dbConn.query(sqlQuery, function (error, results, fields) {
-                if (error) throw error;
-            res.status(200).json(results);
-            });
-        } else if (role === "doctor"){
-            sqlQuery = 'SELECT * FROM doctor_tb';
-            dbConn.query(sqlQuery, function (error, results, fields) {
-                if (error) throw error;
-            res.status(200).json(results);  
-            });
-        } else { 
-            res.status(200).json(
-            noAccess = 'You have no access');  
-    } 
+    sqlQuery = 'SELECT * FROM doctor_tb';
+    dbConn.query(sqlQuery, function (error, results, fields) {
+        if (error) throw error;
+    res.status(200).json(results);
     });
+});
 
 // UPDATE
 // @routes POST/doctor/update/:doctorId

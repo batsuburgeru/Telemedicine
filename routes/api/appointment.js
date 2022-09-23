@@ -4,34 +4,34 @@ var router = express.Router();
 var dbConn = require('../../config/db.js');
 
 // INSERT
-// @routes GET medRecord/add
-// @desc Insert Data to medRecord_tb
-// @accessible only to Patient and Admin
-
-router.post('/add/:patientId',(req,res) =>{   
+// @routes GET patient/add
+// @desc Insert Data to patient_tb
+// @accessible only to Doctor and Admin
+router.post('/add/:doctorId',(req,res) =>{   
 const token = req.headers.authorization.split(' ')[1];   
 if (!token){
     res.status(200).json({success:false,msg:'Error: Token was not found'});
-}      
+}
+        
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
     
-console.log(decodedToken.data['email']);
-console.log(decodedToken.data['accountId']);
-
-var patientId = req.params.patientId;
-var role = decodedToken.data['role'];
-var fullName = req.body.fullName;
+var doctorId = req.params.doctorId
+var patientId = req.body.patientId;
+var doctorName = req.body.doctorName;    
+var patientName = req.body.patientName;
 var date = req.body.date;
-var record = req.body.record;
-
+var time = req.body.time;
+var meetingLink = req.body.meetingLink;
+var role = decodedToken.data['role'];
+        
     if(role === "admin"){    
-        sqlQuery = `INSERT INTO medRecord_tb (patientId, fullName, date, record) VALUES (${patientId},"${fullName}","${date}","${record}")`;
+        sqlQuery = `INSERT INTO appointment_tb (doctorId, patientId, patientName, doctorName, date, time, meetingLink) VALUES (${doctorId}, ${patientId}, "${patientName}","${doctorName}","${date}","${time}","${meetingLink}")`;
         dbConn.query(sqlQuery, function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json(results);
         });
-    } else if (role === "patient"){
-        sqlQuery = `INSERT INTO medRecord_tb (patientId, fullName, date, record) VALUES (${patientId},"${fullName}","${date}","${record}")`;
+    } else if (role === "doctor"){
+        sqlQuery = `INSERT INTO appointment_tb (doctorId, patientId, patientName, doctorName, date, time, meetingLink) VALUES (${doctorId}, ${patientId}, "${patientName}","${doctorName}","${date}","${time}","${meetingLink}")`;
         dbConn.query(sqlQuery, function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json(results);
@@ -43,71 +43,72 @@ var record = req.body.record;
     } 
 });
 
-// SELECT OR SEARCH
-// @routes GET patient/view
+// SELECT OR VIEW
+// @routes GET appointment/view
 // @desc View Data from the Database
 // @accessible to All Roles
 
-
-router.get('/view/:patientId', (req, res) => {
-const token = req.headers.authorization.split(' ')[1];   
-if (!token){
-    res.status(200).json({success:false,msg:'Error: Token was not found'});
-}      
-const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-var patientId = req.params.patientId;
-
-sqlQuery = `SELECT * FROM medRecord_tb WHERE patientId = ${patientId}`;
-dbConn.query(sqlQuery, function (error, results, fields) {
-    if (error) throw error;
-    res.status(200).json({
-    msg: 'Data Successfully Fetched',
-    results: results,
-    });
-    console.log(msg = "Data Successfully Fetched!")
-});
-});
-
-// UPDATE
-// @routes POST/medRecord/update/:patientId
-// @desc Update Data to Database
-// @accessible only to Patient and Admin
-
-router.post('/update/:patientId',(req,res) =>{   
+router.get('/view/:appointmentId', (req, res) => {
 const token = req.headers.authorization.split(' ')[1];
-    
+        
 if (!token){
     res.status(200).json({success:false,msg:'Error: Token was not found'});
 };
-               
+
+var appointmentId = req.params.appointmentId
+
+const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
+        
+    sqlQuery = `SELECT * FROM appointment_tb WHERE appointmentId = ${appointmentId}`;
+    dbConn.query(sqlQuery, function (error, results, fields) {
+        if (error) throw error;
+    res.status(200).json(results);
+    });
+});
+
+// UPDATE
+// @routes POST/appointment/update/:appointmentId
+// @desc Update Data to Database
+// @accessible only to Doctors and Admin
+
+router.post('/update/:appointmentId',(req,res) =>{   
+const token = req.headers.authorization.split(' ')[1];
+        
+if (!token){
+    res.status(200).json({success:false,msg:'Error: Token was not found'});
+};
+                   
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 console.log(decodedToken.data);
 console.log(req.body);
-
-var patientId = req.params.patientId;
-var fullName = req.body.fullName;
+    
+var appointmentId = req.params.appointmentId;
+var patientId = req.body.patientId;
+var doctorName = req.body.doctorName;    
+var patientName = req.body.patientName;
 var date = req.body.date;
-var record = req.body.record;
-var role = decodedToken.data ['role'];
-        
+var time = req.body.time;
+var meetingLink = req.body.meetingLink;
+var role = decodedToken.data['role'];
+            
     if (role === "admin"){
-        sqlQuery = `UPDATE medRecord_tb SET fullName = "${fullName}", date = "${date}", record = "${record}" WHERE patientId = ${patientId}`;
+        sqlQuery = `UPDATE appointment_tb SET patientId = "${patientId}", patientName = "${patientName}", doctorName = "${doctorName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}" WHERE appointmentId = ${appointmentId}`;
         dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json({
         msg: 'Data Successfully Updated',
         results: results,
         });
-        });
-    }else if (role === "patient"){
-        sqlQuery = `UPDATE medRecord_tb SET fullName = "${fullName}", date = "${date}", record = "${record}" WHERE patientId = ${patientId}`;
+    });
+    }else if (role === "doctor"){
+        sqlQuery = `UPDATE appointment_tb SET patientId = "${patientId}", patientName = "${patientName}", doctorName = "${doctorName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}" WHERE appointmentId = ${appointmentId}`;
         dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json({
         msg: 'Data Successfully Updated',
         results: results,
-            });
         });
+    });
     } else { 
         res.status(200).json(
         noAccess = 'You have no access');
@@ -116,11 +117,11 @@ var role = decodedToken.data ['role'];
 });
 
 // DELETE
-// @routes POST /patient/delete/:patientId
+// @routes POST /appointment/delete/:appointmentId
 // @desc DELETE Data to Database
 // @accessible only to Admin
 
-router.delete('/delete/:medRecordId', (req, res) => {
+router.delete('/delete/:appointmentId', (req, res) => {
 const token = req.headers.authorization.split(' ')[1];
     
 if (!token){
@@ -132,11 +133,11 @@ console.log(decodedToken.data);
 console.log(req.body);
 console.log(req.params.patientId);
     
-var medRecordId = req.params.medRecordId;
+var appointmentId = req.params.appointmentId;
 var role = decodedToken.data['role'];
     
     if (role === "admin"){
-        sqlQuery = `DELETE FROM medRecord_tb WHERE medRecordId = ${medRecordId}`;
+        sqlQuery = `DELETE FROM appointment_tb WHERE appointmentId = ${appointmentId}`;
         dbConn.query(sqlQuery, function (error, results, fields) {
             if (error) throw error;
         res.status(200).json({
@@ -146,10 +147,32 @@ var role = decodedToken.data['role'];
         });
     } else { 
         res.status(200).json(
-        noAccess = 'You have no access');
-        console.log(msg = "Error: Role Does Not Fit!");  
+        noAccess = 'You have no access');  
     };
 });
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

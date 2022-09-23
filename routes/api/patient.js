@@ -7,7 +7,7 @@ var dbConn = require('../../config/db.js');
 // INSERT
 // @routes GET patient/add
 // @desc Insert Data to patient_tb
-// @access Private
+// @accessible only to Patients and Admin
 router.post('/add',(req,res) =>{   
 const token = req.headers.authorization.split(' ')[1];
     
@@ -27,6 +27,7 @@ var email = decodedToken.data['email'];
 var accountId = decodedToken.data['accountId'];
 var address = req.body.address;
 var cellphoneNumber = req.body.cellphoneNumber;
+var role = decodedToken.data['role'];
     
 // connect to mysql database and perform INSERT Query
     if(role === "admin"){    
