@@ -4,9 +4,10 @@ var router = express.Router();
 var dbConn = require('../../config/db.js');
 
 // INSERT
-// @routes GET patient/add
-// @desc Insert Data to patient_tb
+// @routes POST doctorTransaction/add/:appointmentId
+// @desc Insert Data to Database
 // @accessible only to Doctor and Admin
+
 router.post('/add/:appointmentId',(req,res) =>{   
 const token = req.headers.authorization.split(' ')[1];   
 if (!token){
@@ -14,7 +15,9 @@ if (!token){
 }
             
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-  
+console.log(decodedToken.data);
+console.log(req.body);
+ 
 var appointmentId = req.params.appointmentId;
 var patientName = req.body.patientName;    
 var date = req.body.date;
@@ -43,9 +46,9 @@ var role = decodedToken.data['role'];
 });
 
 // SELECT OR VIEW
-// @routes GET patientTransaction/view
+// @routes GET doctorTransaction/view/:transactionId
 // @desc View Data from the Database
-// @accessible to Patient and Admin
+// @accessible to doctor and Admin
 
 router.get('/view/:transactionId', (req, res) => {
 const token = req.headers.authorization.split(' ')[1];
@@ -55,6 +58,9 @@ if (!token){
 };
       
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
+console.log(decodedToken.data);
+console.log(req.body);
+
 var transactionId = req.params.transactionId;
      
     if(role === "admin"){
@@ -63,7 +69,7 @@ var transactionId = req.params.transactionId;
             if (error) throw error;
         res.status(200).json(results);
         });
-    } else if (role === "patient"){
+    } else if (role === "doctor"){
         sqlQuery = `SELECT * FROM doctorTransaction_tb WHERE referenceId = ${transactionId}`;
         dbConn.query(sqlQuery, function (error, results, fields) {
             if (error) throw error;
@@ -77,23 +83,22 @@ var transactionId = req.params.transactionId;
 });
 
 // UPDATE
-// @routes POST/patientTransaction/update/:referenceId
+// @routes POST doctorTransaction/update/:referenceId
 // @desc Update Data to Database
 // @accessible only to Doctors and Admin
 
 router.post('/update/:transactionId',(req,res) =>{   
 const token = req.headers.authorization.split(' ')[1];
            
-    if (!token){
-       res.status(200).json({success:false,msg:'Error: Token was not found'});
-    };
+if (!token){
+    res.status(200).json({success:false,msg:'Error: Token was not found'});
+};
                        
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 console.log(decodedToken.data);
 console.log(req.body);
         
-var transactionId = req.params.transactionId;
-var doctorName = req.body.doctorName;    
+var transactionId = req.params.transactionId;   
 var date = req.body.date;
 var time = req.body.time;
 var meetingLink = req.body.meetingLink;
@@ -127,7 +132,7 @@ var role = decodedToken.data['role'];
 
 
 // DELETE
-// @routes POST /patientTransaction/delete/:referenceId
+// @routes DELETE /doctorTransaction/delete/:transactionId
 // @desc DELETE Data to Database
 // @accessible only to Admin
 
@@ -141,7 +146,6 @@ if (!token){
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 console.log(decodedToken.data);
 console.log(req.body);
-console.log(req.params.patientId);
         
 var transactionId = req.params.transactionId;
 var role = decodedToken.data['role'];

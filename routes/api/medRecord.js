@@ -4,8 +4,8 @@ var router = express.Router();
 var dbConn = require('../../config/db.js');
 
 // INSERT
-// @routes GET medRecord/add
-// @desc Insert Data to medRecord_tb
+// @routes POST medRecord/add/:patientId
+// @desc Insert Data to Database
 // @accessible only to Patient and Admin
 
 router.post('/add/:patientId',(req,res) =>{   
@@ -15,8 +15,8 @@ if (!token){
 }      
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
     
-console.log(decodedToken.data['email']);
-console.log(decodedToken.data['accountId']);
+console.log(decodedToken.data);
+console.log(req.body);
 
 var patientId = req.params.patientId;
 var role = decodedToken.data['role'];
@@ -44,10 +44,9 @@ var record = req.body.record;
 });
 
 // SELECT OR SEARCH
-// @routes GET patient/view
+// @routes GET medRecord/view/:patientId
 // @desc View Data from the Database
 // @accessible to All Roles
-
 
 router.get('/view/:patientId', (req, res) => {
 const token = req.headers.authorization.split(' ')[1];   
@@ -55,6 +54,9 @@ if (!token){
     res.status(200).json({success:false,msg:'Error: Token was not found'});
 }      
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
+console.log(decodedToken.data);
+console.log(req.body);
+
 var patientId = req.params.patientId;
 
 sqlQuery = `SELECT * FROM medRecord_tb WHERE patientId = ${patientId}`;
@@ -116,7 +118,7 @@ var role = decodedToken.data ['role'];
 });
 
 // DELETE
-// @routes POST /patient/delete/:patientId
+// @routes DELETE /medRecord/delete/:medRecordId
 // @desc DELETE Data to Database
 // @accessible only to Admin
 
@@ -130,7 +132,6 @@ if (!token){
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 console.log(decodedToken.data);
 console.log(req.body);
-console.log(req.params.patientId);
     
 var medRecordId = req.params.medRecordId;
 var role = decodedToken.data['role'];
@@ -150,15 +151,6 @@ var role = decodedToken.data['role'];
         console.log(msg = "Error: Role Does Not Fit!");  
     };
 });
-
-
-
-
-
-
-
-
-
 
 
 module.exports = router;

@@ -1,20 +1,19 @@
 var express = require('express');
-
 var router = express.Router();
-
 const jwt = require('jsonwebtoken');
-
 var dbConn = require('../../config/db');
 
 // SIGNUP
+// @routes POST /auth/signup
+// @desc Signup to Database
+// @accessible to all Roles
+
 router.post('/signup',(req,res,next) => {
 var username = req.body.username;
 var email = req.body.email;
 var password = req.body.password;
 var role = req.body.role;
 accountId = " ";
-
-
 
 try {
 sqlQuery = `INSERT INTO account_tb (username, role, email, password) VALUES ("${username}","${role}","${email}","${password}")`;
@@ -30,6 +29,10 @@ dbConn.query (sqlQuery, function(error,results, fields) {
 });
 
 // LOGIN
+// @routes POST /auth/login
+// @desc Login to Database
+// @accessible to all Roles
+
 router.post('/login',(req,res,next) => {
         var email = req.body.email;
         var password = req.body.password;

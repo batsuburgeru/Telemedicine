@@ -4,8 +4,8 @@ var router = express.Router();
 var dbConn = require('../../config/db.js');
 
 // INSERT
-// @routes GET patient/add
-// @desc Insert Data to patient_tb
+// @routes POST appointment/add/:doctorId
+// @desc Insert Data to Database
 // @accessible only to Doctor and Admin
 router.post('/add/:doctorId',(req,res) =>{   
 const token = req.headers.authorization.split(' ')[1];   
@@ -14,8 +14,10 @@ if (!token){
 }
         
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-    
-var doctorId = req.params.doctorId
+console.log(decodedToken.data);
+console.log(req.body);
+
+var doctorId = req.params.doctorId;
 var patientId = req.body.patientId;
 var doctorName = req.body.doctorName;    
 var patientName = req.body.patientName;
@@ -44,7 +46,7 @@ var role = decodedToken.data['role'];
 });
 
 // SELECT OR VIEW
-// @routes GET appointment/view
+// @routes GET appointment/view/:appointmentId
 // @desc View Data from the Database
 // @accessible to All Roles
 
@@ -117,7 +119,7 @@ var role = decodedToken.data['role'];
 });
 
 // DELETE
-// @routes POST /appointment/delete/:appointmentId
+// @routes DELETE /appointment/delete/:appointmentId
 // @desc DELETE Data to Database
 // @accessible only to Admin
 
@@ -151,37 +153,4 @@ var role = decodedToken.data['role'];
     };
 });
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 module.exports = router;

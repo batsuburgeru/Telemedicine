@@ -1,7 +1,6 @@
 var express = require('express');
 const jwt = require('jsonwebtoken');
 var router = express.Router();
-
 var dbConn = require('../../config/db.js');
 
 // INSERT 
@@ -16,7 +15,9 @@ if (!token){
 }
     
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-    
+console.log(decodedToken.data);
+console.log(req.body);
+
 var fullName = req.body.fullName;
 var gender = req.body.gender;
 var dateOfBirth = req.body.dateOfBirth;
@@ -47,11 +48,11 @@ var role = decodedToken.data['role'];
 });
 
 // SELECT OR VIEW
-// @routes GET doctors/view
+// @routes GET doctors/view/:doctorId
 // @desc View Data from the Database
 // @accessible to All Roles
 
-router.get('/view', (req, res) => {
+router.get('/view/:doctorId', (req, res) => {
 const token = req.headers.authorization.split(' ')[1];
     
 if (!token){
@@ -59,8 +60,12 @@ if (!token){
 };
            
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-    
-    sqlQuery = 'SELECT * FROM doctor_tb';
+console.log(decodedToken.data);
+console.log(req.body);
+
+var doctorId = req.params.doctorId;
+
+    sqlQuery = `SELECT * FROM doctor_tb WHERE doctorId = ${doctorId}`;
     dbConn.query(sqlQuery, function (error, results, fields) {
         if (error) throw error;
     res.status(200).json(results);
@@ -71,53 +76,54 @@ const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 // @routes POST/doctor/update/:doctorId
 // @desc Update Data to Database
 // @accessible only to Doctors and Admin
-router.post('/update/:doctorId',(req,res) =>{   
-    const token = req.headers.authorization.split(' ')[1];
-    
-    if (!token){
-        res.status(200).json({success:false,msg:'Error: Token was not found'});
-    };
-               
-    const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
-    console.log(decodedToken.data);
-    console.log(req.body);
 
-    var doctorId = req.params.doctorId;
-    var fullName = req.body.fullName;
-    var gender = req.body.gender;
-    var dateOfBirth = req.body.dateOfBirth;
-    var email = req.body.email;
-    var address = req.body.address;
-    var qualificationDesc = req.body.qualificationDesc;
-    var cellphoneNumber = req.body.cellphoneNumber;
-    var role = decodedToken.data['role'];
+router.post('/update/:doctorId',(req,res) =>{   
+const token = req.headers.authorization.split(' ')[1];
+    
+if (!token){
+    res.status(200).json({success:false,msg:'Error: Token was not found'});
+};
+               
+const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
+console.log(decodedToken.data);
+console.log(req.body);
+
+var doctorId = req.params.doctorId;
+var fullName = req.body.fullName;
+var gender = req.body.gender;
+var dateOfBirth = req.body.dateOfBirth;
+var email = req.body.email;
+var address = req.body.address;
+var qualificationDesc = req.body.qualificationDesc;
+var cellphoneNumber = req.body.cellphoneNumber;
+var role = decodedToken.data['role'];
         
-        if (role === "admin"){
-          sqlQuery = `UPDATE doctor_tb SET fullName = "${fullName}", gender = "${gender}", dateOfBirth = "${dateOfBirth}", email = "${email}", address = "${address}", qualificationDesc = "${qualificationDesc}", cellphoneNumber = ${cellphoneNumber} WHERE doctorId = ${doctorId}`;
-          dbConn.query(sqlQuery,  function( error, results, fields ){ 
+    if (role === "admin"){
+        sqlQuery = `UPDATE doctor_tb SET fullName = "${fullName}", gender = "${gender}", dateOfBirth = "${dateOfBirth}", email = "${email}", address = "${address}", qualificationDesc = "${qualificationDesc}", cellphoneNumber = ${cellphoneNumber} WHERE doctorId = ${doctorId}`;
+        dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
+        res.status(200).json({
+        msg: 'Data Successfully Updated',
+        results: results,
+        });
+    });
+    }else if (role === "doctor"){
+        sqlQuery = `UPDATE doctor_tb SET fullName = "${fullName}", gender = "${gender}", dateOfBirth = "${dateOfBirth}", email = "${email}", address = "${address}", qualificationDesc = "${qualificationDesc}", cellphoneNumber = ${cellphoneNumber} WHERE doctorId = ${doctorId}`;
+        dbConn.query(sqlQuery,  function( error, results, fields ){ 
+              if (error) throw error;
             res.status(200).json({
             msg: 'Data Successfully Updated',
             results: results,
             });
-          });
-        }else if (role === "doctor"){
-            sqlQuery = `UPDATE doctor_tb SET fullName = "${fullName}", gender = "${gender}", dateOfBirth = "${dateOfBirth}", email = "${email}", address = "${address}", qualificationDesc = "${qualificationDesc}", cellphoneNumber = ${cellphoneNumber} WHERE doctorId = ${doctorId}`;
-            dbConn.query(sqlQuery,  function( error, results, fields ){ 
-              if (error) throw error;
-              res.status(200).json({
-              msg: 'Data Successfully Updated',
-              results: results,
-              });
-            });
-        } else { 
-            res.status(200).json(
-            noAccess = 'You have no access');  
+        });
+    } else { 
+        res.status(200).json(
+        noAccess = 'You have no access');  
     } 
-      });
+});
     
-    // DELETE
-// @routes POST /patient/delete/:patientId
+// DELETE
+// @routes DELETE /doctor/delete/:doctorId
 // @desc DELETE Data to Database
 // @accessible only to Admin
 
@@ -131,7 +137,6 @@ if (!token){
 const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 console.log(decodedToken.data);
 console.log(req.body);
-console.log(req.params.doctorId);
     
 var doctorId = req.params.doctorId;
 var role = decodedToken.data['role'];
@@ -151,9 +156,5 @@ var role = decodedToken.data['role'];
     };
 });
     
-    
-    
-    
-    
-    
+      
     module.exports = router;
