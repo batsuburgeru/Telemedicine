@@ -62,6 +62,7 @@ console.log(decodedToken.data);
 console.log(req.body);
 
 var referenceId = req.params.referenceId;
+var role = decodedToken.data['role'];
      
     if (role === "admin"){
         sqlQuery = `SELECT * FROM patientTransaction_tb WHERE referenceId = ${referenceId}`;
@@ -107,7 +108,7 @@ var status = req.body.status;
 var role = decodedToken.data['role'];
                 
     if (role === "admin"){
-        sqlQuery = `UPDATE appointment_tb SET doctorName = "${doctorName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE referenceId = ${referenceId}`;
+        sqlQuery = `UPDATE patientTransaction_tb SET doctorName = "${doctorName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE referenceId = ${referenceId}`;
         dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json({
@@ -116,7 +117,7 @@ var role = decodedToken.data['role'];
         });
     });
     }else if (role === "doctor"){
-        sqlQuery = `UPDATE appointment_tb SET doctorName = "${doctorName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE referenceId = ${referenceId}`;
+        sqlQuery = `UPDATE patientTransaction_tb SET doctorName = "${doctorName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE referenceId = ${referenceId}`;
         dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json({

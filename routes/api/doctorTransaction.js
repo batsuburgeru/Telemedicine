@@ -27,13 +27,13 @@ var status = req.body.status;
 var role = decodedToken.data['role'];
             
     if(role === "admin"){    
-        sqlQuery = `INSERT INTO patientTransaction_tb (appointmentId, patientName, date, time, meetingLink, status) VALUES (${appointmentId}, "${patientName}","${date}","${time}","${meetingLink}", "${status}")`;
+        sqlQuery = `INSERT INTO doctorTransaction_tb (appointmentId, patientName, date, time, meetingLink, status) VALUES (${appointmentId}, "${patientName}","${date}","${time}","${meetingLink}", "${status}")`;
         dbConn.query(sqlQuery, function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json(results);
         });
     } else if (role === "doctor"){
-        sqlQuery = `INSERT INTO patientTransaction_tb (appointmentId, patientName, date, time, meetingLink, status) VALUES (${appointmentId}, "${patientName}","${date}","${time}","${meetingLink}", "${status}")`;
+        sqlQuery = `INSERT INTO doctorTransaction_tb (appointmentId, patientName, date, time, meetingLink, status) VALUES (${appointmentId}, "${patientName}","${date}","${time}","${meetingLink}", "${status}")`;
         dbConn.query(sqlQuery, function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json(results);
@@ -62,6 +62,7 @@ console.log(decodedToken.data);
 console.log(req.body);
 
 var transactionId = req.params.transactionId;
+var role = decodedToken.data['role'];
      
     if(role === "admin"){
         sqlQuery = `SELECT * FROM doctorTransaction_tb WHERE transactionId = ${transactionId}`;
@@ -70,7 +71,7 @@ var transactionId = req.params.transactionId;
         res.status(200).json(results);
         });
     } else if (role === "doctor"){
-        sqlQuery = `SELECT * FROM doctorTransaction_tb WHERE referenceId = ${transactionId}`;
+        sqlQuery = `SELECT * FROM doctorTransaction_tb WHERE transactionId = ${transactionId}`;
         dbConn.query(sqlQuery, function (error, results, fields) {
             if (error) throw error;
         res.status(200).json(results);
@@ -98,7 +99,8 @@ const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN);
 console.log(decodedToken.data);
 console.log(req.body);
         
-var transactionId = req.params.transactionId;   
+var transactionId = req.params.transactionId;  
+var patientName = req.body.patientName; 
 var date = req.body.date;
 var time = req.body.time;
 var meetingLink = req.body.meetingLink;
@@ -106,7 +108,7 @@ var status = req.body.status;
 var role = decodedToken.data['role'];
                 
     if (role === "admin"){
-        sqlQuery = `UPDATE doctorTansaction_tb SET patientName = "${patientName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE transactionId = ${transactionId}`;
+        sqlQuery = `UPDATE doctorTransaction_tb SET patientName = "${patientName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE transactionId = ${transactionId}`;
         dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json({
@@ -115,7 +117,7 @@ var role = decodedToken.data['role'];
         });
     });
     }else if (role === "doctor"){
-        sqlQuery = `UPDATE doctorTansaction_tb SET patientName = "${patientName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE transactionId = ${transactionId}`;
+        sqlQuery = `UPDATE doctorTransaction_tb SET patientName = "${patientName}", date = "${date}", time = "${time}", meetingLink = "${meetingLink}", status = "${status}" WHERE transactionId = ${transactionId}`;
         dbConn.query(sqlQuery,  function( error, results, fields ){ 
             if (error) throw error;
         res.status(200).json({
